@@ -76,13 +76,20 @@ function demoReply(text) {
 
 async function reply(text) {
   if (!API_URL) return demoReply(text);
+  var ctrl = new AbortController();
+  var timer = setTimeout(function () { ctrl.abort(); }, 25000);
   try {
     var msgs = memory.history.slice(-20);
-    var r = await fetch(API_URL, {method: "POST", headers: {"Content-Type": "application/json"},
+    var r = await fetch(API_URL, {method: "POST", signal: ctrl.signal, headers: {"Content-Type": "application/json"},
       body: JSON.stringify({system: SYSTEM + (memory.name ? " User ka naam " + memory.name + " hai." : ""), messages: msgs})});
-    var j = await r.json();
-    return j.reply || "Kuch gadbad ho gayi, dobara bol.";
-  } catch (e) { return "Net ya server mein dikkat hai. Thodi der baad try kar."; }
+    var raw = await r.text();
+    var j;
+    try { j = JSON.parse(raw); } catch (e) { return "Server ne ajeeb jawab diya (code " + r.status + "): " + raw.slice(0, 120); }
+    return j.reply || "Khali jawab aaya (code " + r.status + ").";
+  } catch (e) {
+    if (e.name === "AbortError") return "Jawab mein bahut der lag gayi. Dobara try kar.";
+    return "Connection error: " + e.message;
+  } finally { clearTimeout(timer); }
 }
 
 document.getElementById("f").addEventListener("submit", async function (e) {
@@ -93,7 +100,10 @@ document.getElementById("f").addEventListener("submit", async function (e) {
   t.value = "";
   add(text, "me");
   memory.history.push({role: "user", content: text});
+  add("QYAARO soch raha hai…", "bot");
+  var typing = chat.lastChild;
   var out = await reply(text);
+  typing.remove();
   add(out, "bot");
   memory.history.push({role: "assistant", content: out});
   memory.history = memory.history.slice(-40);
