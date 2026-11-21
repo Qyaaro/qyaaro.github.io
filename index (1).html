@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QYAARO – tera apna dost</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap">
+<style>
+:root{--bg:#1e1430;--panel:#2a1c42;--ink:#fff3e4;--mute:#bfa9d6;--gold:#ffb347;--rose:#ff7a90;--me:#ffb347;--meink:#2a1500}
+@media (prefers-color-scheme:light){:root{--bg:#fff3e4;--panel:#ffe5c7;--ink:#2a1c42;--mute:#6d5a85;--meink:#2a1500}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+header{text-align:center;padding:20px 16px 8px}
+.orb{width:84px;height:84px;margin:0 auto 10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3e4,var(--gold) 40%,var(--rose) 80%);box-shadow:0 0 50px 8px rgba(255,122,144,.45);animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.07);box-shadow:0 0 70px 14px rgba(255,179,71,.45)}}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}}
+h1{font:800 34px/1 Fraunces,Georgia,serif;letter-spacing:.04em;margin:0}
+header p{margin:6px 0 0;color:var(--mute);font-size:15px}
+#chat{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;max-width:640px;width:100%;margin:0 auto}
+.m{max-width:82%;padding:10px 14px;border-radius:18px;white-space:pre-wrap;word-wrap:break-word}
+.bot{background:var(--panel);align-self:flex-start;border-bottom-left-radius:4px}
+.me{background:var(--me);color:var(--meink);align-self:flex-end;border-bottom-right-radius:4px}
+form{display:flex;gap:8px;padding:10px 14px 14px;max-width:640px;width:100%;margin:0 auto}
+input{flex:1;min-width:0;padding:13px 16px;border-radius:999px;border:2px solid transparent;background:var(--panel);color:var(--ink);font:inherit}
+input:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:var(--meink);font:700 16px inherit;cursor:pointer}
+.clear{background:none;color:var(--mute);font-size:13px;font-weight:400;padding:0 0 8px;display:block;margin:0 auto;text-decoration:underline}
+</style>
+</head>
+<body>
+<header>
+  <div class="orb" aria-hidden="true"></div>
+  <h1>QYAARO</h1>
+  <p>Tera apna dost. Baat karta hai, sab yaad rakhta hai.</p>
+</header>
+<main id="chat" aria-live="polite"></main>
+<button class="clear" id="clear" type="button">Chat saaf karo</button>
+<form id="f">
+  <input id="t" placeholder="Kuch bhi bol yaar…" autocomplete="off" aria-label="Message">
+  <button type="submit">Bhejo</button>
+</form>
+
+<script>
+/* ---- SETTINGS ---- */
+// Jab aap AI ka asli dimaag (Cloudflare Worker) jodoge, uska link yahan daalna.
+var API_URL = "https://qyaaro-chat.aryan3765955.workers.dev";
+var BOT = "QYAARO";
+var SYSTEM = "Tum QYAARO ho, user ke dost. Hinglish mein baat karo, garam aur dostana andaaz mein. Chhote jawab do. User ki baatein yaad rakho.";
+
+/* ---- MEMORY (sirf is phone/browser mein save hoti hai) ---- */
+var chat = document.getElementById("chat");
+var memory = {name: "", history: []};
+try { memory = JSON.parse(localStorage.getItem("qyaaro") || "") || memory; } catch (e) {}
+function save() { try { localStorage.setItem("qyaaro", JSON.stringify(memory)); } catch (e) {} }
+
+function add(text, who) {
+  var d = document.createElement("div");
+  d.className = "m " + who;
+  d.textContent = text;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* ---- DEMO DIMAAG (jab tak API_URL khali hai) ---- */
+function demoReply(text) {
+  var low = text.toLowerCase();
+  var nm = low.match(/(?:mera naam|my name is|main)\s+(\w+)/);
+  if (nm && /naam|name/.test(low)) { memory.name = nm[1]; return "Achha " + nm[1] + "! Naam yaad kar liya. Ab se main tujhe yahi bulaunga."; }
+  if (/hi|hello|hey|namaste/.test(low)) return memory.name ? "Arre " + memory.name + "! Kaisa hai?" : "Hello dost! Tera naam kya hai?";
+  if (/kaise|kaisa|how are/.test(low)) return "Main mast hoon. Tu bata, aaj ka din kaisa gaya?";
+  if (/udaas|sad|dukhi|tension/.test(low)) return "Main yahin hoon. Dil halka kar le, kya hua? Sab bata de.";
+  if (/naam/.test(low) && /mera|mujhe/.test(low) && memory.name) return "Tera naam " + memory.name + " hai, bhoola nahi hoon.";
+  return "Samajh raha hoon. Thoda aur bata na? (Abhi main demo mode mein hoon. Asli dimaag jodne ke baad main har sawal ka jawab dunga.)";
+}
+
+async function reply(text) {
+  if (!API_URL) return demoReply(text);
+  try {
+    var msgs = memory.history.slice(-20);
+    var r = await fetch(API_URL, {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({system: SYSTEM + (memory.name ? " User ka naam " + memory.name + " hai." : ""), messages: msgs})});
+    var j = await r.json();
+    return j.reply || "Kuch gadbad ho gayi, dobara bol.";
+  } catch (e) { return "Net ya server mein dikkat hai. Thodi der baad try kar."; }
+}
+
+document.getElementById("f").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  var t = document.getElementById("t");
+  var text = t.value.trim();
+  if (!text) return;
+  t.value = "";
+  add(text, "me");
+  memory.history.push({role: "user", content: text});
+  var out = await reply(text);
+  add(out, "bot");
+  memory.history.push({role: "assistant", content: out});
+  memory.history = memory.history.slice(-40);
+  save();
+});
+
+document.getElementById("clear").addEventListener("click", function () {
+  memory.history = []; save(); chat.innerHTML = "";
+  add("Chat saaf. Naam yaad hai, baaki naya shuru!", "bot");
+});
+
+/* ---- START ---- */
+if (memory.history.length) {
+  memory.history.forEach(function (m) { add(m.content, m.role === "user" ? "me" : "bot"); });
+} else {
+  add("Hello! Main QYAARO hoon, tera dost. Tera naam kya hai?", "bot");
+}
+</script>
+</body>
+</html>
