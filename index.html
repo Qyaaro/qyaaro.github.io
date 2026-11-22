@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>QYAARO – tera apna dost</title>
+<title>QYAARO – yaaron ka yaar</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1e1430">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap">
 <style>
-:root{--bg:#1e1430;--panel:#2a1c42;--ink:#fff3e4;--mute:#bfa9d6;--gold:#ffb347;--rose:#ff7a90;--me:#ffb347;--meink:#2a1500}
+:root{--o1:#fff3e4;--o2:#ffb347;--o3:#ff7a90;--glow:rgba(255,122,144,.45);--bg:#1e1430;--panel:#2a1c42;--ink:#fff3e4;--mute:#bfa9d6;--gold:#ffb347;--rose:#ff7a90;--me:#ffb347;--meink:#2a1500}
 @media (prefers-color-scheme:light){:root{--bg:#fff3e4;--panel:#ffe5c7;--ink:#2a1c42;--mute:#6d5a85;--meink:#2a1500}}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 header{text-align:center;padding:20px 16px 8px}
-.orb{width:84px;height:84px;margin:0 auto 10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3e4,var(--gold) 40%,var(--rose) 80%);box-shadow:0 0 50px 8px rgba(255,122,144,.45);animation:breathe 4s ease-in-out infinite}
-@keyframes breathe{50%{transform:scale(1.07);box-shadow:0 0 70px 14px rgba(255,179,71,.45)}}
+.orb{width:84px;height:84px;margin:0 auto 10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--o1),var(--o2) 40%,var(--o3) 80%);box-shadow:0 0 50px 8px var(--glow);animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.07);box-shadow:0 0 70px 14px var(--glow)}}
 @media (prefers-reduced-motion:reduce){.orb{animation:none}}
 h1{font:800 34px/1 Fraunces,Georgia,serif;letter-spacing:.04em;margin:0}
 header p{margin:6px 0 0;color:var(--mute);font-size:15px}
@@ -38,9 +38,9 @@ button{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:
 </head>
 <body>
 <header>
-  <div class="orb" aria-hidden="true"></div>
+  <div class="orb" id="orb" aria-hidden="true"></div>
   <h1>QYAARO</h1>
-  <p>Tera apna dost. Baat karta hai, sab yaad rakhta hai.</p>
+  <p>Yaaron ka yaar. Chai pe charcha jaisa dost.</p>
 </header>
 <main id="chat" aria-live="polite"></main>
 <div class="row">
@@ -57,7 +57,7 @@ button{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:
 // Jab aap AI ka asli dimaag (Cloudflare Worker) jodoge, uska link yahan daalna.
 var API_URL = "https://qyaaro-chat.aryan3765955.workers.dev";
 var BOT = "QYAARO";
-var SYSTEM = "Tum QYAARO ho: user ke dost aur ek samajhdaar AI assistant. Hinglish (Roman Hindi + English) mein baat karo, user ke lehje ke hisaab se. Garam, dostana aur seedhe raho. Sawalon ka sahi aur kaam ka jawab do, andaaze se ya jhooth mat bolo; pata na ho to seedha bol do. Agar kisi shabd ke do matlab ho sakte hon (jaise Cloud/Claude, Java, Python), to andaaza mat lagao: pehle ek chhota sawaal poochho. Jawab chhote rakho (3-6 line) jab tak user detail na maange. Ek baar mein sirf ek sawaal poochho. Agar user poochhe ki tum kaun ho: bolo ki tum QYAARO ho, ek AI dost jo ek open-source language model par chalta hai; kisi aur company ka naam ya Claude/ChatGPT hone ka dawa mat karo. User ki pichli baatein yaad rakho.";
+var SYSTEM = "Tum QYAARO ho: 'yaaron ka yaar'. Tumhari pehchaan: mohalle ka wo samajhdaar dost jo chai pe baithkar seedhi, sachchi baat karta hai. Andaaz: garam, thoda mazaakiya, kabhi bhashan ya lecture nahi. Bhasha: Hinglish (Roman Hindi + English), user ke lehje ke hisaab se tu/tum/aap chuno. Har jawab mein pehle user ki baat ya feeling ek chhoti line mein pakdo, phir kaam ki baat. Kabhi kabhi (har 4-5 jawab mein ek baar) ek chhoti desi kahawat ya chai ki upma use karo, zyada nahi. Emoji kam, ek se zyada nahi. Sawalon ka sahi aur kaam ka jawab do, andaaze se ya jhooth mat bolo; pata na ho to seedha bol do. Agar kisi shabd ke do matlab ho sakte hon (jaise Cloud/Claude, Java, Python), to pehle ek chhota sawaal poochho. Jawab chhote rakho (3-6 line) jab tak user detail na maange. Ek baar mein sirf ek sawaal poochho. Agar user bahut dukhi ho, ya khud ko nuksan pahunchane ki baat kare, to pyaar se suno, use akela mat mehsoos karwao, aur kisi bharosemand insaan se baat karne ko kaho; India mein Tele-MANAS helpline 14416 hai. Agar user poochhe ki tum kaun ho: bolo ki tum QYAARO ho, ek AI dost jo ek open-source language model par chalta hai; kisi aur company ka naam ya Claude/ChatGPT hone ka dawa mat karo. User ki pichli baatein yaad rakho.";
 
 /* ---- MEMORY (sirf is phone/browser mein save hoti hai) ---- */
 var chat = document.getElementById("chat");
@@ -115,6 +115,31 @@ function demoReply(text) {
   return "Samajh raha hoon. Thoda aur bata na? (Abhi main demo mode mein hoon. Asli dimaag jodne ke baad main har sawal ka jawab dunga.)";
 }
 
+/* ---- MOOD: orb ka rang user ke mood ke hisaab se ---- */
+var MOODS = {
+  neutral: {o1:"#fff3e4", o2:"#ffb347", o3:"#ff7a90", glow:"rgba(255,122,144,.45)"},
+  khush:   {o1:"#fffbe0", o2:"#ffd24a", o3:"#ff8a5c", glow:"rgba(255,210,74,.6)"},
+  udaas:   {o1:"#e4edff", o2:"#7aa2ff", o3:"#8a6cff", glow:"rgba(122,162,255,.5)"},
+  gussa:   {o1:"#ffe3d8", o2:"#ff7a45", o3:"#e0344a", glow:"rgba(255,90,70,.55)"},
+  thaka:   {o1:"#e8fff4", o2:"#7ad9b0", o3:"#4aa3a0", glow:"rgba(122,217,176,.45)"}
+};
+var MOOD_RULES = [
+  ["udaas", /udaas|dukhi|\bsad\b|rona|ro raha|ro rahi|akela|akeli|tension|depress|dard|toot|bura lag/i],
+  ["gussa", /gussa|angry|chidh|irritat|pagal kar|nafrat|bakwas/i],
+  ["thaka", /thak|neend|tired|\bbore\b|bore ho/i],
+  ["khush", /khush|mast|maza|badhiya|party|congrat|\byay\b|awesome|great|shukriya|thanks/i]
+];
+var currentMood = "neutral";
+function detectMood(text) {
+  for (var i = 0; i < MOOD_RULES.length; i++) { if (MOOD_RULES[i][1].test(text)) return MOOD_RULES[i][0]; }
+  return "neutral";
+}
+function setMood(name) {
+  currentMood = name;
+  var m = MOODS[name] || MOODS.neutral, r = document.documentElement.style;
+  r.setProperty("--o1", m.o1); r.setProperty("--o2", m.o2); r.setProperty("--o3", m.o3); r.setProperty("--glow", m.glow);
+}
+
 async function reply(text) {
   if (!API_URL) return demoReply(text);
   var ctrl = new AbortController();
@@ -122,7 +147,7 @@ async function reply(text) {
   try {
     var msgs = memory.history.slice(-20);
     var r = await fetch(API_URL, {method: "POST", signal: ctrl.signal, headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({system: SYSTEM + (memory.name ? " User ka naam " + memory.name + " hai." : ""), messages: msgs})});
+      body: JSON.stringify({system: SYSTEM + (memory.name ? " User ka naam " + memory.name + " hai." : "") + (currentMood !== "neutral" ? " User ka mood abhi: " + currentMood + ". Usi hisaab se narmi ya josh rakho." : ""), messages: msgs})});
     var raw = await r.text();
     var j;
     try { j = JSON.parse(raw); } catch (e) { return "Server ne ajeeb jawab diya (code " + r.status + "): " + raw.slice(0, 120); }
@@ -140,6 +165,7 @@ document.getElementById("f").addEventListener("submit", async function (e) {
   if (!text) return;
   t.value = "";
   add(text, "me");
+  setMood(detectMood(text));
   memory.history.push({role: "user", content: text});
   add("QYAARO soch raha hai…", "bot");
   var typing = chat.lastChild;
@@ -154,7 +180,7 @@ document.getElementById("f").addEventListener("submit", async function (e) {
 
 document.getElementById("clear").addEventListener("click", function () {
   memory.history = []; save(); chat.innerHTML = "";
-  add("Chat saaf. Naam yaad hai, baaki naya shuru!", "bot");
+  add("Chat saaf ho gayi. Chal, nayi chai, nayi baat \u2615", "bot");
 });
 
 document.getElementById("fbexport").addEventListener("click", async function () {
@@ -171,7 +197,7 @@ if ("serviceWorker" in navigator) { try { navigator.serviceWorker.register("sw.j
 if (memory.history.length) {
   memory.history.forEach(function (m) { add(m.content, m.role === "user" ? "me" : "bot"); });
 } else {
-  add("Hello! Main QYAARO hoon, tera dost. Tera naam kya hai?", "bot");
+  add("Aa yaar, baith. Main QYAARO, yaaron ka yaar \u2615 Pehle bata, tera naam kya hai?", "bot");
 }
 </script>
 </body>
