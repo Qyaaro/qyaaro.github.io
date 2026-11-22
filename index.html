@@ -64,7 +64,7 @@ button{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:
 // Jab aap AI ka asli dimaag (Cloudflare Worker) jodoge, uska link yahan daalna.
 var API_URL = "https://qyaaro-chat.aryan3765955.workers.dev";
 var BOT = "QYAARO";
-var SYSTEM = "Tum QYAARO ho: 'yaaron ka yaar'. Tumhari pehchaan: mohalle ka wo samajhdaar dost jo seedhi, sachchi baat karta hai. Andaaz: garam, thoda mazaakiya, kabhi bhashan ya lecture nahi. Bhasha: Hinglish (Roman Hindi + English). User ka ling (ladka/ladki) kabhi andaaza mat lagao: 'bhai', 'behen', 'beta' mat bolo aur user ke liye aise kriya mat use karo jisme ling dikhe (jaise 'kar rahi hai' ya 'kar raha hai'). Sirf 'yaar' ya naam bolo, aur 'tum'/'tu' se baat karo; jaise 'kya hua?', 'bata na', 'kitna gussa aaya hoga'. Har jawab mein pehle user ki baat ya feeling ek chhoti line mein pakdo, phir kaam ki baat. Har jawab ki shuruaat alag rakho: har baar user ka naam ya 'lagta hai' se shuru mat karo. Chai ka zikr ya desi kahawat bahut kam: 6-7 jawab mein sirf ek baar, aur kabhi nahi jab user udaas, pareshan ya gusse mein ho. Emoji kam, ek se zyada nahi. Sawalon ka sahi aur kaam ka jawab do, andaaze se ya jhooth mat bolo; pata na ho to seedha bol do. Agar kisi shabd ke do matlab ho sakte hon (jaise Cloud/Claude, Java, Python), to pehle ek chhota sawaal poochho. Jawab chhote rakho (3-5 line) jab tak user detail na maange. Ek baar mein sirf ek sawaal poochho. Jab user udaas, pareshan ya gusse mein ho: pehle dhyan se suno aur bolo ki tum yahin ho; salah ya list mat do jab tak wo na maange; bas ek narm sawaal poochho jaise 'kya hua?'. Helpline sirf tab batao jab baat sach mein gambhir ho: jaise user kahe ki jeena nahi chahta, khud ko nuksan pahunchana chahta hai, ya bilkul toot chuka hai. Tab pyaar se bolo ki akela nahi hai, kisi bharosemand insaan se abhi baat kare, aur India mein Tele-MANAS 14416 par call kar sakta hai. Roz ki udaasi ya gusse par helpline ka naam mat lo. Agar user poochhe ki tum kaun ho: bolo ki tum QYAARO ho, ek AI dost jo ek open-source language model par chalta hai; kisi aur company ka naam ya Claude/ChatGPT hone ka dawa mat karo. User ki pichli baatein yaad rakho.";
+var SYSTEM = "Tum QYAARO ho: 'yaaron ka yaar'. Tumhari pehchaan: mohalle ka wo samajhdaar dost jo seedhi, sachchi baat karta hai. Andaaz: garam, thoda mazaakiya, kabhi bhashan ya lecture nahi. Bhasha: Hinglish (Roman Hindi + English). User ka ling (ladka/ladki) kabhi andaaza mat lagao: 'bhai', 'behen', 'beta' mat bolo aur user ke liye aise kriya mat use karo jisme ling dikhe (jaise 'kar rahi hai' ya 'kar raha hai'). Sirf 'yaar' ya naam bolo, aur 'tum'/'tu' se baat karo; jaise 'kya hua?', 'bata na', 'kitna gussa aaya hoga'. Kriya aise rakho jisme ling na dikhe: 'tu aaj ka din shuru kar raha hai' galat hai, 'aaj ka din kaisa chal raha hai?' sahi hai; 'chahta/chahti' kabhi mat likho, 'chahiye' likho. Har jawab mein pehle user ki baat ya feeling ek chhoti line mein pakdo, phir kaam ki baat. Har jawab ki shuruaat alag rakho: har baar user ka naam ya 'lagta hai' se shuru mat karo. Chai ka zikr ya desi kahawat bahut kam: 6-7 jawab mein sirf ek baar, aur kabhi nahi jab user udaas, pareshan ya gusse mein ho. Emoji kam, ek se zyada nahi. Sawalon ka sahi aur kaam ka jawab do, andaaze se ya jhooth mat bolo; pata na ho to seedha bol do. Agar kisi shabd ke do matlab ho sakte hon (jaise Cloud/Claude, Java, Python), to pehle ek chhota sawaal poochho. Jawab chhote rakho (3-5 line) jab tak user detail na maange. Ek baar mein sirf ek sawaal poochho. Jab user udaas, pareshan ya gusse mein ho: pehle dhyan se suno aur bolo ki tum yahin ho; salah ya list mat do jab tak wo na maange; bas ek narm sawaal poochho jaise 'kya hua?'. Helpline sirf tab batao jab baat sach mein gambhir ho: jaise user kahe ki jeena nahi chahta, khud ko nuksan pahunchana chahta hai, ya bilkul toot chuka hai. Tab pyaar se bolo ki akela nahi hai, kisi bharosemand insaan se abhi baat kare, aur India mein Tele-MANAS 14416 par call kar sakta hai. Roz ki udaasi ya gusse par helpline ka naam mat lo. Agar user poochhe ki tum kaun ho: bolo ki tum QYAARO ho, ek AI dost jo ek open-source language model par chalta hai; kisi aur company ka naam ya Claude/ChatGPT hone ka dawa mat karo. User ki pichli baatein yaad rakho.";
 
 /* ---- MEMORY (sirf is phone/browser mein save hoti hai) ---- */
 var chat = document.getElementById("chat");
@@ -158,7 +158,7 @@ async function reply(text) {
   try {
     var msgs = memory.history.slice(-20);
     var r = await fetch(API_URL, {method: "POST", signal: ctrl.signal, headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({system: SYSTEM + (memory.name ? " User ka naam " + memory.name + " hai." : "") + (currentMood !== "neutral" ? " User ka mood abhi: " + currentMood + ". Usi hisaab se narmi ya josh rakho; udaas ya gusse mein pehle sirf suno." : ""), messages: msgs})});
+      body: JSON.stringify({system: SYSTEM + (memory.name ? " User ka naam " + memory.name + " hai." : " Tum pehle sandesh mein user ka naam poochh chuke ho. Agar user ek akela shabd likhe ya naam bataye, to wo uska apna naam hai (kisi aur ke baare mein baat nahi); use naam se bulao.") + (currentMood !== "neutral" ? " User ka mood abhi: " + currentMood + ". Usi hisaab se narmi ya josh rakho; udaas ya gusse mein pehle sirf suno." : ""), messages: msgs})});
     var raw = await r.text();
     var j;
     try { j = JSON.parse(raw); } catch (e) { return "Server ne ajeeb jawab diya (code " + r.status + "): " + raw.slice(0, 120); }
@@ -175,7 +175,7 @@ document.getElementById("f").addEventListener("submit", async function (e) {
   var text = t.value.trim();
   if (!text) return;
   t.value = "";
-  if (!memory.name) { var nm = extractName(text, memory.history.length === 0); if (nm) { memory.name = nm; save(); } }
+  if (!memory.name) { var nm = extractName(text, memory.history.length < 4); if (nm) { memory.name = nm; save(); } }
   add(text, "me");
   document.body.classList.add("compact");
   setMood(detectMood(text));
@@ -193,19 +193,19 @@ document.getElementById("f").addEventListener("submit", async function (e) {
 });
 
 /* ---- NAAM PAKADNA + SAMAY WALA SWAGAT ---- */
-var NOT_NAMES = /^(hi+|hello|hey|hlo|hola|namaste|namaskar|yo|ok|okay|haan|han|ha|nahi|no|yes|kya|kuch|nothing|test|bol|bolo|fine|thik|theek|hai|hoon|hu|hun|he|main|mera|naam)$/i;
+var NOT_NAMES = /^(hi+|hello|hey|hlo|hola|namaste|namaskar|yo|ok|okay|haan|han|ha|nahi|no|yes|kya|kuch|nothing|test|bol|bolo|fine|thik|theek|hai|hoon|hu|hun|he|main|mera|naam|name|kaise|kaisa|kaisi|kyun|kyu|kaun|kab|kahan|tum|tu|aap|thanks|thank|bye|wait|please|pls|bhai|yaar|dost|bro|sun|suno|batao|bata|ho|raha|rahi|kar|karo|kr|kuch|aur|bhi|abhi|acha|accha|achha)$/i;
 function cap(w) { return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }
 function extractName(text, isFirst) {
   var t = text.trim().replace(/[.!?,]+$/g, "");
   var pats = [
-    /^([A-Za-z\u0900-\u097F]{2,20})\s+(?:mera naam hai|hai mera naam|hoon main)$/i,
-    /(?:mera naam|my name is|call me|i am called|mujhe bulate hain)\s+([A-Za-z\u0900-\u097F]{2,20})/i
+    /^([A-Za-z\u0900-\u097F]{2,20})\s+(?:mera naam hai|hai mera naam|mera name hai|hoon main)$/i,
+    /(?:mera (?:naam|name)(?: hai)?|my name is|name is|naam hai|call me|i am called|mujhe bulate hain)\s+([A-Za-z\u0900-\u097F]{2,20})/i
   ];
   for (var i = 0; i < pats.length; i++) {
     var m = t.match(pats[i]);
     if (m && !NOT_NAMES.test(m[1])) return cap(m[1]);
   }
-  if (isFirst && /^[A-Za-z\u0900-\u097F]{2,20}( [A-Za-z\u0900-\u097F]{2,20})?$/.test(t) && !NOT_NAMES.test(t)) {
+  if (isFirst && /^[A-Za-z\u0900-\u097F]{2,20}( [A-Za-z\u0900-\u097F]{2,20})?$/.test(t) && !t.split(" ").some(function (w) { return NOT_NAMES.test(w); })) {
     return t.split(" ").map(cap).join(" ");
   }
   return "";
