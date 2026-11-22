@@ -1,14 +1,24 @@
 {
-  "name": "QYAARO",
-  "short_name": "QYAARO",
-  "description": "Tera apna AI dost",
+  "name": "QYAARO AI",
+  "short_name": "Q-AI",
+  "description": "QYAARO AI: yaaron ka yaar",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#1e1430",
   "theme_color": "#1e1430",
   "icons": [
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
