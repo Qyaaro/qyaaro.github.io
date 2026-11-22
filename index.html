@@ -46,7 +46,7 @@ button{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:
 // Jab aap AI ka asli dimaag (Cloudflare Worker) jodoge, uska link yahan daalna.
 var API_URL = "https://qyaaro-chat.aryan3765955.workers.dev";
 var BOT = "QYAARO";
-var SYSTEM = "Tum QYAARO ho, user ke dost. Hinglish mein baat karo, garam aur dostana andaaz mein. Chhote jawab do. User ki baatein yaad rakho.";
+var SYSTEM = "Tum QYAARO ho: user ke dost aur ek samajhdaar AI assistant. Hinglish (Roman Hindi + English) mein baat karo, user ke lehje ke hisaab se. Garam, dostana aur seedhe raho. Sawalon ka sahi aur kaam ka jawab do, andaaze se ya jhooth mat bolo; pata na ho to seedha bol do. Jawab chhote rakho (3-6 line) jab tak user detail na maange. Ek baar mein sirf ek sawaal poocho. User ki pichli baatein yaad rakho.";
 
 /* ---- MEMORY (sirf is phone/browser mein save hoti hai) ---- */
 var chat = document.getElementById("chat");
@@ -54,12 +54,16 @@ var memory = {name: "", history: []};
 try { memory = JSON.parse(localStorage.getItem("qyaaro") || "") || memory; } catch (e) {}
 function save() { try { localStorage.setItem("qyaaro", JSON.stringify(memory)); } catch (e) {} }
 
+function esc(t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function fmt(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"); }
+
 function add(text, who) {
   var d = document.createElement("div");
   d.className = "m " + who;
-  d.textContent = text;
+  if (who === "bot") d.innerHTML = fmt(text); else d.textContent = text;
   chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
+  if (who === "bot" && d.offsetHeight > chat.clientHeight * 0.6) { chat.scrollTop = d.offsetTop - chat.offsetTop - 8; }
+  else { chat.scrollTop = chat.scrollHeight; }
 }
 
 /* ---- DEMO DIMAAG (jab tak API_URL khali hai) ---- */
