@@ -19,7 +19,14 @@ header{text-align:center;padding:20px 16px 8px}
 @keyframes breathe{50%{transform:scale(1.07);box-shadow:0 0 70px 14px var(--glow)}}
 @media (prefers-reduced-motion:reduce){.orb{animation:none}}
 h1{font:800 34px/1 Fraunces,Georgia,serif;letter-spacing:.04em;margin:0}
-header p{margin:6px 0 0;color:var(--mute);font-size:15px}
+header p{margin:6px 0 0;color:var(--mute);font-size:15px;max-height:40px;overflow:hidden;transition:opacity .3s,max-height .3s,margin .3s}
+header{transition:padding .3s}
+.orb{transition:width .35s,height .35s,margin .35s}
+h1{transition:font-size .35s}
+body.compact header{padding:10px 16px 4px}
+body.compact .orb{width:44px;height:44px;margin-bottom:4px}
+body.compact h1{font-size:20px}
+body.compact header p{opacity:0;max-height:0;margin:0}
 #chat{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;max-width:640px;width:100%;margin:0 auto}
 .m{max-width:82%;padding:10px 14px;border-radius:18px;white-space:pre-wrap;word-wrap:break-word}
 .bot{background:var(--panel);align-self:flex-start;border-bottom-left-radius:4px}
@@ -168,7 +175,9 @@ document.getElementById("f").addEventListener("submit", async function (e) {
   var text = t.value.trim();
   if (!text) return;
   t.value = "";
+  if (!memory.name) { var nm = extractName(text, memory.history.length === 0); if (nm) { memory.name = nm; save(); } }
   add(text, "me");
+  document.body.classList.add("compact");
   setMood(detectMood(text));
   memory.history.push({role: "user", content: text});
   add("QYAARO soch raha hai…", "bot");
@@ -183,9 +192,39 @@ document.getElementById("f").addEventListener("submit", async function (e) {
   save();
 });
 
+/* ---- NAAM PAKADNA + SAMAY WALA SWAGAT ---- */
+var NOT_NAMES = /^(hi+|hello|hey|hlo|hola|namaste|namaskar|yo|ok|okay|haan|han|ha|nahi|no|yes|kya|kuch|nothing|test|bol|bolo|fine|thik|theek|hai|hoon|hu|hun|he|main|mera|naam)$/i;
+function cap(w) { return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }
+function extractName(text, isFirst) {
+  var t = text.trim().replace(/[.!?,]+$/g, "");
+  var pats = [
+    /^([A-Za-z\u0900-\u097F]{2,20})\s+(?:mera naam hai|hai mera naam|hoon main)$/i,
+    /(?:mera naam|my name is|call me|i am called|mujhe bulate hain)\s+([A-Za-z\u0900-\u097F]{2,20})/i
+  ];
+  for (var i = 0; i < pats.length; i++) {
+    var m = t.match(pats[i]);
+    if (m && !NOT_NAMES.test(m[1])) return cap(m[1]);
+  }
+  if (isFirst && /^[A-Za-z\u0900-\u097F]{2,20}( [A-Za-z\u0900-\u097F]{2,20})?$/.test(t) && !NOT_NAMES.test(t)) {
+    return t.split(" ").map(cap).join(" ");
+  }
+  return "";
+}
+function greet() {
+  var h = new Date().getHours(), n = memory.name;
+  if (h >= 5 && h < 12) return "Subah ho gayi, " + n + ". Neend poori hui? Aaj ka kya plan hai?";
+  if (h >= 12 && h < 17) return "Dopahar ho gayi, " + n + ". Din kaisa chal raha hai?";
+  if (h >= 17 && h < 21) return "Shaam ho gayi, " + n + ". Aaj ka din kaisa gaya?";
+  return "Raat ho gayi, " + n + ". Neend nahi aa rahi, ya kuch baat karni hai?";
+}
+function firstMessage() {
+  return memory.name ? greet() : "Aa yaar, baith. Main QYAARO, yaaron ka yaar \u2615 Pehle bata, tera naam kya hai?";
+}
+
 document.getElementById("clear").addEventListener("click", function () {
   memory.history = []; save(); chat.innerHTML = "";
-  add("Chat saaf ho gayi. Chal, nayi chai, nayi baat \u2615", "bot");
+  document.body.classList.remove("compact");
+  add(firstMessage(), "bot");
 });
 
 document.getElementById("fbexport").addEventListener("click", async function () {
@@ -200,9 +239,10 @@ if ("serviceWorker" in navigator) { try { navigator.serviceWorker.register("sw.j
 
 /* ---- START ---- */
 if (memory.history.length) {
+  document.body.classList.add("compact");
   memory.history.forEach(function (m) { add(m.content, m.role === "user" ? "me" : "bot"); });
 } else {
-  add("Aa yaar, baith. Main QYAARO, yaaron ka yaar \u2615 Pehle bata, tera naam kya hai?", "bot");
+  add(firstMessage(), "bot");
 }
 </script>
 </body>
