@@ -151,6 +151,7 @@ function setMood(name) {
   r.setProperty("--o1", m.o1); r.setProperty("--o2", m.o2); r.setProperty("--o3", m.o3); r.setProperty("--glow", m.glow);
 }
 
+var justNamed = "";
 async function reply(text) {
   if (!API_URL) return demoReply(text);
   var ctrl = new AbortController();
@@ -158,7 +159,7 @@ async function reply(text) {
   try {
     var msgs = memory.history.slice(-20);
     var r = await fetch(API_URL, {method: "POST", signal: ctrl.signal, headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({system: SYSTEM + (memory.name ? " User ka naam " + memory.name + " hai." : " Tum pehle sandesh mein user ka naam poochh chuke ho. Agar user ek akela shabd likhe ya naam bataye, to wo uska apna naam hai (kisi aur ke baare mein baat nahi); use naam se bulao.") + (currentMood !== "neutral" ? " User ka mood abhi: " + currentMood + ". Usi hisaab se narmi ya josh rakho; udaas ya gusse mein pehle sirf suno." : ""), messages: msgs})});
+      body: JSON.stringify({system: SYSTEM + (memory.name ? " User ka naam " + memory.name + " hai." : " Tum pehle sandesh mein user ka naam poochh chuke ho. Agar user ne abhi tak naam nahi bataya, to ek baar pyaar se dobara poochho (jaise 'naam to bata yaar').") + (justNamed ? " User ne abhi apna naam bataya hai. Naam se garmjoshi se swagat karo (naam ke baare mein sawaal ya jaankari mat do) aur poochho ki aaj kya chal raha hai." : "") + (currentMood !== "neutral" ? " User ka mood abhi: " + currentMood + ". Usi hisaab se narmi ya josh rakho; udaas ya gusse mein pehle sirf suno." : ""), messages: msgs})});
     var raw = await r.text();
     var j;
     try { j = JSON.parse(raw); } catch (e) { return "Server ne ajeeb jawab diya (code " + r.status + "): " + raw.slice(0, 120); }
@@ -175,14 +176,17 @@ document.getElementById("f").addEventListener("submit", async function (e) {
   var text = t.value.trim();
   if (!text) return;
   t.value = "";
-  if (!memory.name) { var nm = extractName(text, memory.history.length < 4); if (nm) { memory.name = nm; save(); } }
+  var namedNow = "";
+  if (!memory.name) { var nm = extractName(text, memory.history.length < 4); if (nm) { memory.name = nm; namedNow = nm; save(); } }
   add(text, "me");
   document.body.classList.add("compact");
   setMood(detectMood(text));
-  memory.history.push({role: "user", content: text});
+  memory.history.push({role: "user", content: namedNow ? "Mera naam " + namedNow + " hai." : text});
+  justNamed = namedNow;
   add("QYAARO soch raha hai…", "bot");
   var typing = chat.lastChild;
   var out = await reply(text);
+  justNamed = "";
   typing.remove();
   var el = add(out, "bot");
   if (!/^(Abhi jawab nahi|Connection error|Jawab mein bahut|Server ne ajeeb|Khali jawab|Error:)/.test(out)) attachFeedback(el, text, out);
