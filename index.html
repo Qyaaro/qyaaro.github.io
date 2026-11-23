@@ -36,11 +36,15 @@ input{flex:1;min-width:0;padding:13px 16px;border-radius:999px;border:2px solid 
 input:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 button{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:var(--meink);font:700 16px inherit;cursor:pointer}
 .clear{background:none;color:var(--mute);font-size:13px;font-weight:400;padding:0 0 8px;display:block;margin:0 auto;text-decoration:underline}
+.rk{display:inline-block;padding:2px 12px;border-radius:999px;font-weight:700;margin-bottom:2px}
+.rz{background:#e0344a;color:#fff}
+.rm{background:#ff9f45;color:#2a1500}
+.rl{background:#5ad19a;color:#062b1c}
 .fb{margin-top:6px;display:flex;gap:4px}
 .fb button{background:none;border:1px solid var(--mute);color:var(--ink);border-radius:999px;padding:2px 10px;font-size:15px;line-height:1.4;cursor:pointer}
 .fb button[disabled]{opacity:.5;cursor:default}
 .fb button.on{background:var(--gold);color:var(--meink);border-color:var(--gold);opacity:1}
-.row{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 16px}
+.row{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;padding:0 14px}
 #guard{color:var(--gold);text-decoration:none;font-weight:600;border:1px solid var(--gold);border-radius:999px;padding:3px 12px 4px;margin:0 0 8px}
 body.guard #guard{background:var(--gold);color:var(--meink)}
 body.guard input{border-color:var(--gold)}
@@ -54,9 +58,9 @@ body.guard input{border-color:var(--gold)}
 </header>
 <main id="chat" aria-live="polite"></main>
 <div class="row">
-  <button class="clear" id="clear" type="button">Chat saaf karo</button>
+  <button class="clear" id="clear" type="button">Chat saaf</button>
   <button class="clear" id="guard" type="button">🛡️ Suraksha jaanch</button>
-  <button class="clear" id="fbexport" type="button">Feedback copy karo</button>
+  <button class="clear" id="fbexport" type="button">Feedback copy</button>
 </div>
 <form id="f">
   <input id="t" placeholder="Kuch bhi bol yaar…" autocomplete="off" aria-label="Message">
@@ -77,7 +81,11 @@ try { memory = JSON.parse(localStorage.getItem("qyaaro") || "") || memory; } cat
 function save() { try { localStorage.setItem("qyaaro", JSON.stringify(memory)); } catch (e) {} }
 
 function esc(t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-function fmt(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"); }
+function fmt(t) {
+  var cls = {ZYADA: "rz", MADHYAM: "rm", KAM: "rl"};
+  return esc(t).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/Khatra:\s*(ZYADA|MADHYAM|KAM)/g, function (m, lv) { return '<span class="rk ' + cls[lv] + '">Khatra: ' + lv + "</span>"; });
+}
 
 function scrollBot(el, who) {
   if (who === "bot" && el.offsetHeight > chat.clientHeight * 0.6) { chat.scrollTop = el.offsetTop - chat.offsetTop - 8; }
@@ -156,7 +164,7 @@ function setMood(name) {
 }
 
 /* ---- SURAKSHA JAANCH ---- */
-var GUARD_SYSTEM = "Tum QYAARO ke 'Suraksha jaanch' mode mein ho. User ne koi sandesh, link ya call ki baat bheji hai jispar use shak hai. Jawab ka dhaancha: (1) Pehli line: khatra KAM, MADHYAM ya ZYADA, ek vaakya mein. (2) 'Kyun:' 2-4 chhote karan. (3) 'Abhi kya karo:' 2-3 chhote, seedhe kadam. India ke aam dhokhe dhyan mein rakho: digital arrest (police/CBI ke naam par video call), fake KYC ya account band hone ka sandesh, OTP/UPI PIN maangna, UPI collect request, anjaan APK, loan app, job ya task wala dhokha, lottery, fake customer care number. Agar paise ya OTP chale gaye hon: turant bank ko call karke card/UPI block karwao, 1930 (cyber crime helpline) par call karo aur cybercrime.gov.in par shikayat darj karo. Jaan ko khatra ho to 112. Zaroori: tum sirf sanket dete ho, 100% pakka nahi bata sakte, aur ye kaha kar mat daraao ki 'tum bach gaye'. Agar shak ho to ZYADA ya MADHYAM ki taraf jhuko. Asli bank, police ya company ka official app ya number khud dhoondhne ko kaho, sandesh mein diya number ya link nahi. Hinglish mein, narm par seedha. User ke ling ka andaaza mat lagao. Jawab chhota rakho.";
+var GUARD_SYSTEM = "Tum QYAARO ke 'Suraksha jaanch' mode mein ho. User ne koi sandesh, link ya call ki baat bheji hai jispar use shak hai. Jawab ka dhaancha, bilkul isi kram mein: (1) Pehli line sirf: 'Khatra: ZYADA' ya 'Khatra: MADHYAM' ya 'Khatra: KAM'. (2) 'Kyun:' ke neeche zyada se zyada 3 chhote bullet, har ek 12 shabd se kam. (3) 'Abhi kya karo:' ke neeche zyada se zyada 3 chhote kadam. (4) Sirf tab jab paise, OTP ya PIN ka khatra ho: ek line mein batao ki paise ya OTP chale gaye hon to turant bank ko call karke card/UPI block karwao, 1930 (cyber crime helpline) par call karo aur cybercrime.gov.in par shikayat darj karo. Jaan ko khatra ho to 112. (5) Aakhir mein ek chhoti line: 'Ye sirf sanket hain, final faisla aapka.' Mujhe 'Shuruaati sanket' bhi mil sakte hain, unhe shabd-ba-shabd dohrao mat. India ke aam dhokhe dhyan mein rakho: digital arrest (police/CBI ke naam par video call), fake KYC, OTP/UPI PIN maangna, UPI collect request, anjaan APK, loan app, job ya task wala dhokha, lottery, fake customer care number. Zaroori: tum 100% pakka nahi bata sakte, aur kabhi mat kaho ki 'tum bach gaye'. Shak ho to ZYADA ya MADHYAM ki taraf jhuko. Asli bank, police ya company ka official app ya number khud dhoondhne ko kaho, sandesh mein diya number ya link nahi. Bhasha: saaf Hinglish, 'karo', 'mat karo', 'batao' jaise rup (kabhi 'karein', 'karwayen', 'karayein' nahi). 'FIR' mat bolo, 'shikayat' bolo. User ke ling ka andaaza mat lagao. Dhyan rahe ki user dara hua ho sakta hai: shaant aur seedha raho.";
 var GUARD_RULES = [
   [/\b(otp|pin|cvv|password|passcode)\b/i, "OTP/PIN/CVV/password kabhi kisi ko mat batao. Asli bank ya police ye nahi maangte."],
   [/(digital arrest|giraftar|arrest|warrant|\bcbi\b|narcotics|customs)/i, "Police/CBI/customs ke naam par darr: asli agency video call par giraftar nahi karti aur paise nahi maangti."],
@@ -226,10 +234,12 @@ document.getElementById("f").addEventListener("submit", async function (e) {
   justNamed = namedNow;
   add("QYAARO soch raha hai…", "bot");
   var typing = chat.lastChild;
+  if (wasGuard && flags.length) { typing.innerHTML = fmt("\u26A0\uFE0F Turant sanket:\n- " + flags.join("\n- ") + "\n\nJaanch ho rahi hai\u2026"); scrollBot(typing, "bot"); }
   var out = await reply(text, wasGuard);
   justNamed = "";
   if (wasGuard) {
-    if (flags.length) out = "\u26A0\uFE0F Turant sanket:\n- " + flags.join("\n- ") + "\n\n" + out;
+    var failed = /^(Abhi jawab nahi|Connection error|Jawab mein bahut|Server ne ajeeb|Khali jawab|Error:)/.test(out);
+    if (flags.length && failed) out = "\u26A0\uFE0F Turant sanket:\n- " + flags.join("\n- ") + "\n\n" + out;
     applyGuard(false);
   }
   typing.remove();
