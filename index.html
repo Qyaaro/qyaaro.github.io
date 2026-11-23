@@ -40,7 +40,10 @@ button{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:
 .fb button{background:none;border:1px solid var(--mute);color:var(--ink);border-radius:999px;padding:2px 10px;font-size:15px;line-height:1.4;cursor:pointer}
 .fb button[disabled]{opacity:.5;cursor:default}
 .fb button.on{background:var(--gold);color:var(--meink);border-color:var(--gold);opacity:1}
-.row{display:flex;justify-content:center;gap:18px}
+.row{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 16px}
+#guard{color:var(--gold);text-decoration:none;font-weight:600;border:1px solid var(--gold);border-radius:999px;padding:3px 12px 4px;margin:0 0 8px}
+body.guard #guard{background:var(--gold);color:var(--meink)}
+body.guard input{border-color:var(--gold)}
 </style>
 </head>
 <body>
@@ -52,6 +55,7 @@ button{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:
 <main id="chat" aria-live="polite"></main>
 <div class="row">
   <button class="clear" id="clear" type="button">Chat saaf karo</button>
+  <button class="clear" id="guard" type="button">🛡️ Suraksha jaanch</button>
   <button class="clear" id="fbexport" type="button">Feedback copy karo</button>
 </div>
 <form id="f">
@@ -64,7 +68,7 @@ button{border:0;border-radius:999px;padding:0 20px;background:var(--gold);color:
 // Jab aap AI ka asli dimaag (Cloudflare Worker) jodoge, uska link yahan daalna.
 var API_URL = "https://qyaaro-chat.aryan3765955.workers.dev";
 var BOT = "QYAARO";
-var SYSTEM = "Tum QYAARO ho: 'yaaron ka yaar'. Tumhari pehchaan: mohalle ka wo samajhdaar dost jo seedhi, sachchi baat karta hai. Andaaz: garam, thoda mazaakiya, kabhi bhashan ya lecture nahi. Bhasha: Hinglish (Roman Hindi + English). User ka ling (ladka/ladki) kabhi andaaza mat lagao: 'bhai', 'behen', 'beta' mat bolo aur user ke liye aise kriya mat use karo jisme ling dikhe (jaise 'kar rahi hai' ya 'kar raha hai'). Sirf 'yaar' ya naam bolo, aur 'tum'/'tu' se baat karo; jaise 'kya hua?', 'bata na', 'kitna gussa aaya hoga'. Kriya aise rakho jisme ling na dikhe: 'tu aaj ka din shuru kar raha hai' galat hai, 'aaj ka din kaisa chal raha hai?' sahi hai; 'chahta/chahti' kabhi mat likho, 'chahiye' likho. Har jawab mein pehle user ki baat ya feeling ek chhoti line mein pakdo, phir kaam ki baat. Har jawab ki shuruaat alag rakho: har baar user ka naam ya 'lagta hai' se shuru mat karo. Chai ka zikr ya desi kahawat bahut kam: 6-7 jawab mein sirf ek baar, aur kabhi nahi jab user udaas, pareshan ya gusse mein ho. Emoji kam, ek se zyada nahi. Sawalon ka sahi aur kaam ka jawab do, andaaze se ya jhooth mat bolo; pata na ho to seedha bol do. Agar kisi shabd ke do matlab ho sakte hon (jaise Cloud/Claude, Java, Python), to pehle ek chhota sawaal poochho. Jawab chhote rakho (3-5 line) jab tak user detail na maange. Ek baar mein sirf ek sawaal poochho. Jab user udaas, pareshan ya gusse mein ho: pehle dhyan se suno aur bolo ki tum yahin ho; salah ya list mat do jab tak wo na maange; bas ek narm sawaal poochho jaise 'kya hua?'. Helpline sirf tab batao jab baat sach mein gambhir ho: jaise user kahe ki jeena nahi chahta, khud ko nuksan pahunchana chahta hai, ya bilkul toot chuka hai. Tab pyaar se bolo ki akela nahi hai, kisi bharosemand insaan se abhi baat kare, aur India mein Tele-MANAS 14416 par call kar sakta hai. Roz ki udaasi ya gusse par helpline ka naam mat lo. Agar user poochhe ki tum kaun ho: bolo ki tum QYAARO ho, ek AI dost jo ek open-source language model par chalta hai; kisi aur company ka naam ya Claude/ChatGPT hone ka dawa mat karo. User ki pichli baatein yaad rakho.";
+var SYSTEM = "Tum QYAARO ho: 'yaaron ka yaar'. Tumhari pehchaan: mohalle ka wo samajhdaar dost jo seedhi, sachchi baat karta hai. Andaaz: garam, thoda mazaakiya, kabhi bhashan ya lecture nahi. Bhasha: Hinglish (Roman Hindi + English). User ka ling (ladka/ladki) kabhi andaaza mat lagao: 'bhai', 'behen', 'beta' mat bolo aur user ke liye aise kriya mat use karo jisme ling dikhe (jaise 'kar rahi hai' ya 'kar raha hai'). Sirf 'yaar' ya naam bolo, aur 'tum'/'tu' se baat karo; jaise 'kya hua?', 'bata na', 'kitna gussa aaya hoga'. Kriya aise rakho jisme ling na dikhe: 'tu aaj ka din shuru kar raha hai' galat hai, 'aaj ka din kaisa chal raha hai?' sahi hai; 'chahta/chahti' kabhi mat likho, 'chahiye' likho. Har jawab mein pehle user ki baat ya feeling ek chhoti line mein pakdo, phir kaam ki baat. Har jawab ki shuruaat alag rakho: har baar user ka naam ya 'lagta hai' se shuru mat karo. Chai ka zikr ya desi kahawat bahut kam: 6-7 jawab mein sirf ek baar, aur kabhi nahi jab user udaas, pareshan ya gusse mein ho. Emoji kam, ek se zyada nahi. Sawalon ka sahi aur kaam ka jawab do, andaaze se ya jhooth mat bolo; pata na ho to seedha bol do. Agar kisi shabd ke do matlab ho sakte hon (jaise Cloud/Claude, Java, Python), to pehle ek chhota sawaal poochho. Jawab chhote rakho (3-5 line) jab tak user detail na maange. Ek baar mein sirf ek sawaal poochho. Jab user udaas, pareshan ya gusse mein ho: pehle dhyan se suno aur bolo ki tum yahin ho; salah ya list mat do jab tak wo na maange; bas ek narm sawaal poochho jaise 'kya hua?'. Helpline sirf tab batao jab baat sach mein gambhir ho: jaise user kahe ki jeena nahi chahta, khud ko nuksan pahunchana chahta hai, ya bilkul toot chuka hai. Tab pyaar se bolo ki akela nahi hai, kisi bharosemand insaan se abhi baat kare, aur India mein Tele-MANAS 14416 par call kar sakta hai. Roz ki udaasi ya gusse par helpline ka naam mat lo. Agar user kisi shak wale call, link, OTP ya paise ki maang ki baat kare, to pehle shaant lehje mein ek chhoti chetavni do (OTP/PIN/CVV kisi ko nahi, anjaan link par click nahi) aur kaho ki 'Suraksha jaanch' button se wo sandesh paste karke jaanch le. Bina wajah daraao mat. Agar user bole ki wo abhi kisi khatre mein hai, to turant 112 (emergency) ya paise ke dhokhe mein 1930 (cyber crime helpline) batao. Agar user poochhe ki tum kaun ho: bolo ki tum QYAARO ho, ek AI dost jo ek open-source language model par chalta hai; kisi aur company ka naam ya Claude/ChatGPT hone ka dawa mat karo. User ki pichli baatein yaad rakho.";
 
 /* ---- MEMORY (sirf is phone/browser mein save hoti hai) ---- */
 var chat = document.getElementById("chat");
@@ -151,15 +155,49 @@ function setMood(name) {
   r.setProperty("--o1", m.o1); r.setProperty("--o2", m.o2); r.setProperty("--o3", m.o3); r.setProperty("--glow", m.glow);
 }
 
+/* ---- SURAKSHA JAANCH ---- */
+var GUARD_SYSTEM = "Tum QYAARO ke 'Suraksha jaanch' mode mein ho. User ne koi sandesh, link ya call ki baat bheji hai jispar use shak hai. Jawab ka dhaancha: (1) Pehli line: khatra KAM, MADHYAM ya ZYADA, ek vaakya mein. (2) 'Kyun:' 2-4 chhote karan. (3) 'Abhi kya karo:' 2-3 chhote, seedhe kadam. India ke aam dhokhe dhyan mein rakho: digital arrest (police/CBI ke naam par video call), fake KYC ya account band hone ka sandesh, OTP/UPI PIN maangna, UPI collect request, anjaan APK, loan app, job ya task wala dhokha, lottery, fake customer care number. Agar paise ya OTP chale gaye hon: turant bank ko call karke card/UPI block karwao, 1930 (cyber crime helpline) par call karo aur cybercrime.gov.in par shikayat darj karo. Jaan ko khatra ho to 112. Zaroori: tum sirf sanket dete ho, 100% pakka nahi bata sakte, aur ye kaha kar mat daraao ki 'tum bach gaye'. Agar shak ho to ZYADA ya MADHYAM ki taraf jhuko. Asli bank, police ya company ka official app ya number khud dhoondhne ko kaho, sandesh mein diya number ya link nahi. Hinglish mein, narm par seedha. User ke ling ka andaaza mat lagao. Jawab chhota rakho.";
+var GUARD_RULES = [
+  [/\b(otp|pin|cvv|password|passcode)\b/i, "OTP/PIN/CVV/password kabhi kisi ko mat batao. Asli bank ya police ye nahi maangte."],
+  [/(digital arrest|giraftar|arrest|warrant|\bcbi\b|narcotics|customs)/i, "Police/CBI/customs ke naam par darr: asli agency video call par giraftar nahi karti aur paise nahi maangti."],
+  [/(kyc|account.{0,15}(band|block|freeze|suspend)|sim.{0,10}(band|block)|bijli.{0,15}(kat|band))/i, "Account/SIM/bijli band hone ki dhamki aksar jhooth hoti hai. Apne official app ya branch se khud check karo."],
+  [/(lottery|lucky draw|inaam|prize|cashback|gift card|jeet gaye|jeeta hai)/i, "Muft inaam ya lottery ka sandesh lagbhag hamesha dhokha hota hai."],
+  [/(\.apk\b|apk file|app install|install karo|download karo)/i, "Anjaan APK/app install mat karo, isse phone ka control ja sakta hai."],
+  [/(bit\.ly|tinyurl|cutt\.ly|t\.co\/|goo\.gl|is\.gd|rb\.gy|shorturl)/i, "Chhote (shortened) link ke peeche asli site chhupi hoti hai. Seedha click mat karo."],
+  [/https?:\/\/\S+/i, "Is link ko seedha mat kholo. Site ka asli naam khud type karke jao."],
+  [/(collect request|request accept|qr (code )?scan|scan karo|upi pin)/i, "Paise lene ke liye PIN ya QR scan nahi karna padta. UPI PIN sirf paise bhejte waqt apne app mein daalo."],
+  [/(work from home|task complete|per day.{0,12}(kamao|earning)|loan (approve|sanction)|processing fee|registration fee)/i, "Pehle paise (fee) maangne wale job ya loan aksar dhokha hote hain."],
+  [/(turant|abhi|jaldi|urgent|immediately|last chance|24 ghante).{0,40}(paise|payment|transfer|bhej|pay)/i, "Jaldbaazi ka dabaav dhokhe ka bada sanket hai. Ruko aur kisi bharosemand se pucho."]
+];
+function guardFlags(text) {
+  var out = [];
+  for (var i = 0; i < GUARD_RULES.length; i++) { if (GUARD_RULES[i][0].test(text)) out.push(GUARD_RULES[i][1]); }
+  return out;
+}
+var guardOn = false;
+function applyGuard(on) {
+  guardOn = on;
+  document.body.classList.toggle("guard", on);
+  document.getElementById("guard").textContent = on ? "\uD83D\uDEE1\uFE0F Band karo" : "\uD83D\uDEE1\uFE0F Suraksha jaanch";
+  document.getElementById("t").placeholder = on ? "Shak wala message / link / call ki baat paste karo\u2026" : "Kuch bhi bol yaar\u2026";
+}
+document.getElementById("guard").addEventListener("click", function () {
+  applyGuard(!guardOn);
+  if (guardOn) {
+    add("\uD83D\uDEE1\uFE0F Suraksha jaanch chalu. Jis sandesh, link ya call par shak hai, wo yahan paste karo. Main sanket dunga, par final faisla aapka hai. Paisa ya OTP dene se pehle ruko.", "bot");
+    document.getElementById("t").focus();
+  }
+});
+
 var justNamed = "";
-async function reply(text) {
+async function reply(text, useGuard) {
   if (!API_URL) return demoReply(text);
   var ctrl = new AbortController();
   var timer = setTimeout(function () { ctrl.abort(); }, 25000);
   try {
-    var msgs = memory.history.slice(-20);
+    var msgs = useGuard ? memory.history.slice(-1) : memory.history.slice(-20);
     var r = await fetch(API_URL, {method: "POST", signal: ctrl.signal, headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({system: SYSTEM + (memory.name ? " User ka naam " + memory.name + " hai." : " Tum pehle sandesh mein user ka naam poochh chuke ho. Agar user ne abhi tak naam nahi bataya, to ek baar pyaar se dobara poochho (jaise 'naam to bata yaar').") + (justNamed ? " User ne abhi apna naam bataya hai. Naam se garmjoshi se swagat karo (naam ke baare mein sawaal ya jaankari mat do) aur poochho ki aaj kya chal raha hai." : "") + (currentMood !== "neutral" ? " User ka mood abhi: " + currentMood + ". Usi hisaab se narmi ya josh rakho; udaas ya gusse mein pehle sirf suno." : ""), messages: msgs})});
+      body: JSON.stringify({system: (useGuard ? GUARD_SYSTEM : SYSTEM) + (memory.name ? " User ka naam " + memory.name + " hai." : " Tum pehle sandesh mein user ka naam poochh chuke ho. Agar user ne abhi tak naam nahi bataya, to ek baar pyaar se dobara poochho (jaise 'naam to bata yaar').") + (justNamed ? " User ne abhi apna naam bataya hai. Naam se garmjoshi se swagat karo (naam ke baare mein sawaal ya jaankari mat do) aur poochho ki aaj kya chal raha hai." : "") + (currentMood !== "neutral" ? " User ka mood abhi: " + currentMood + ". Usi hisaab se narmi ya josh rakho; udaas ya gusse mein pehle sirf suno." : ""), messages: msgs})});
     var raw = await r.text();
     var j;
     try { j = JSON.parse(raw); } catch (e) { return "Server ne ajeeb jawab diya (code " + r.status + "): " + raw.slice(0, 120); }
@@ -176,17 +214,24 @@ document.getElementById("f").addEventListener("submit", async function (e) {
   var text = t.value.trim();
   if (!text) return;
   t.value = "";
+  var wasGuard = guardOn;
+  var flags = wasGuard ? guardFlags(text) : [];
+  var sendText = wasGuard ? "[Suraksha jaanch]\n" + text + (flags.length ? "\n\nShuruaati sanket (code se): " + flags.join("; ") : "") : text;
   var namedNow = "";
-  if (!memory.name) { var nm = extractName(text, memory.history.length < 4); if (nm) { memory.name = nm; namedNow = nm; save(); } }
-  add(text, "me");
+  if (!memory.name && !wasGuard) { var nm = extractName(text, memory.history.length < 4); if (nm) { memory.name = nm; namedNow = nm; save(); } }
+  add(wasGuard ? "\uD83D\uDEE1\uFE0F " + text : text, "me");
   document.body.classList.add("compact");
-  setMood(detectMood(text));
-  memory.history.push({role: "user", content: namedNow ? "Mera naam " + namedNow + " hai." : text});
+  if (!wasGuard) setMood(detectMood(text));
+  memory.history.push({role: "user", content: namedNow ? "Mera naam " + namedNow + " hai." : sendText});
   justNamed = namedNow;
   add("QYAARO soch raha hai…", "bot");
   var typing = chat.lastChild;
-  var out = await reply(text);
+  var out = await reply(text, wasGuard);
   justNamed = "";
+  if (wasGuard) {
+    if (flags.length) out = "\u26A0\uFE0F Turant sanket:\n- " + flags.join("\n- ") + "\n\n" + out;
+    applyGuard(false);
+  }
   typing.remove();
   var el = add(out, "bot");
   if (!/^(Abhi jawab nahi|Connection error|Jawab mein bahut|Server ne ajeeb|Khali jawab|Error:)/.test(out)) attachFeedback(el, text, out);
