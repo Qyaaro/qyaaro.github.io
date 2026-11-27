@@ -207,10 +207,15 @@ document.getElementById("guard").addEventListener("click", function () {
 var REFUSAL_NOTE = " Pehle tumne kisi baat par mana kiya tha. Ab user ke naye sawaal ka alag, seedha jawab do. Agar user 'kyu' ya wajah poochhe, ek vaakya mein sach batao ki tumne mana kyun kiya aur koi achha vikalp do. Wahi mana karne wala vaakya dobara mat dohrao.";
 /* ---- purane "maaf karo" jawab AI ko dobara nahi bhejte (loop rokne ke liye) ---- */
 var REFUSAL = /^(mujhe maaf|maaf kijiye|maaf karo|sorry|main (is baare mein|isme) madad nahi|\u092E\u0941\u091D\u0947 \u092E\u093E\u092B)/i;
+function isRefusal(m) {
+  return m.role === "assistant" && m.content.length < 140 &&
+    (REFUSAL.test(m.content.trim()) || /madad nahi kar (sakta|sakti)|\u092E\u0926\u0926 \u0928\u0939\u0940\u0902 \u0915\u0930/i.test(m.content));
+}
+var ERR_RE = /^(Abhi jawab nahi|Connection error|Jawab mein bahut|Server ne ajeeb|Khali jawab|Error:|Gemini|Groq|Ye site allowed)/;
 function cleanHistory(msgs) {
   var out = [];
   msgs.forEach(function (m) {
-    if (m.role === "assistant" && m.content.length < 140 && REFUSAL.test(m.content.trim())) return;
+    if (isRefusal(m)) return;
     var last = out[out.length - 1];
     if (last && last.role === m.role) { out[out.length - 1] = {role: last.role, content: last.content + "\n" + m.content}; }
     else out.push({role: m.role, content: m.content});
@@ -218,37 +223,37 @@ function cleanHistory(msgs) {
   return out;
 }
 var justNamed = "";
-async function reply(text, useGuard) {
+async function reply(text, useGuard, guardMsg) {
   if (!API_URL) return demoReply(text);
   var ctrl = new AbortController();
-  var timer = setTimeout(function () { ctrl.abort(); }, 25000);
+  var timer = setTimeout(function () { ctrl.abort(); }, 45000);
   try {
-    var msgs = useGuard ? memory.history.slice(-1) : cleanHistory(memory.history.slice(-20));
-    var refusedBefore = false;
-    if (!useGuard) {
-      msgs = msgs.filter(function (m) {
-        var bad = m.role === "assistant" && /madad nahi kar (sakta|sakti)|\u092E\u0926\u0926 \u0928\u0939\u0940\u0902 \u0915\u0930/i.test(m.content);
-        if (bad) refusedBefore = true;
-        return !bad;
-      });
-    }
+    var recent = memory.history.slice(-20);
+    var refusedBefore = !useGuard && recent.some(isRefusal);   // pehle jaanch, phir safai
+    var msgs = useGuard ? [{role: "user", content: guardMsg}] : cleanHistory(recent);
+    var sys = (useGuard ? GUARD_SYSTEM : SYSTEM) + (refusedBefore ? REFUSAL_NOTE : "") +
+      (memory.name ? " User ka naam " + memory.name + " hai." : " Tum pehle sandesh mein user ka naam poochh chuke ho. Agar user ne abhi tak naam nahi bataya, to ek baar pyaar se dobara poochho (jaise 'naam to bata yaar').") +
+      (justNamed ? " User ne abhi apna naam bataya hai. Naam se garmjoshi se swagat karo (naam ke baare mein sawaal ya jaankari mat do) aur poochho ki aaj kya chal raha hai." : "") +
+      (currentMood !== "neutral" ? " User ka mood abhi: " + currentMood + ". Usi hisaab se narmi ya josh rakho; udaas ya gusse mein pehle sirf suno." : "");
     var r = await fetch(API_URL, {method: "POST", signal: ctrl.signal, headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({system: (useGuard ? GUARD_SYSTEM : SYSTEM) + (refusedBefore ? REFUSAL_NOTE : "") + (memory.name ? " User ka naam " + memory.name + " hai." : " Tum pehle sandesh mein user ka naam poochh chuke ho. Agar user ne abhi tak naam nahi bataya, to ek baar pyaar se dobara poochho (jaise 'naam to bata yaar').") + (justNamed ? " User ne abhi apna naam bataya hai. Naam se garmjoshi se swagat karo (naam ke baare mein sawaal ya jaankari mat do) aur poochho ki aaj kya chal raha hai." : "") + (currentMood !== "neutral" ? " User ka mood abhi: " + currentMood + ". Usi hisaab se narmi ya josh rakho; udaas ya gusse mein pehle sirf suno." : ""), messages: msgs})});
-    var raw = await r.text();
+      body: JSON.stringify({system: sys, messages: msgs})});
+    var bodyText = await r.text();
     var j;
-    try { j = JSON.parse(raw); } catch (e) { return "Server ne ajeeb jawab diya (code " + r.status + "): " + raw.slice(0, 120); }
+    try { j = JSON.parse(bodyText); } catch (e) { return "Server ne ajeeb jawab diya (code " + r.status + "): " + bodyText.slice(0, 120); }
     return j.reply || "Khali jawab aaya (code " + r.status + ").";
   } catch (e) {
     if (e.name === "AbortError") return "Jawab mein bahut der lag gayi. Dobara try kar.";
     return "Connection error: " + e.message;
   } finally { clearTimeout(timer); }
 }
+var busy = false;
 
 document.getElementById("f").addEventListener("submit", async function (e) {
   e.preventDefault();
   var t = document.getElementById("t");
   var text = t.value.trim();
-  if (!text) return;
+  if (!text || busy) return;
+  busy = true;
   t.value = "";
   var wasGuard = guardOn;
   var flags = wasGuard ? guardFlags(text) : [];
@@ -258,23 +263,31 @@ document.getElementById("f").addEventListener("submit", async function (e) {
   add(wasGuard ? "\uD83D\uDEE1\uFE0F " + text : text, "me");
   document.body.classList.add("compact");
   if (!wasGuard) setMood(detectMood(text));
-  memory.history.push({role: "user", content: namedNow ? "Mera naam " + namedNow + " hai." : sendText});
+  if (!wasGuard) memory.history.push({role: "user", content: namedNow ? "Mera naam " + namedNow + " hai." : sendText});
   justNamed = namedNow;
   add("QYAARO soch raha hai…", "bot");
   var typing = chat.lastChild;
   if (wasGuard && flags.length) { typing.innerHTML = fmt("\u26A0\uFE0F Turant sanket:\n- " + flags.join("\n- ") + "\n\nJaanch ho rahi hai\u2026"); scrollBot(typing, "bot"); }
-  var out = await reply(text, wasGuard);
+  var out;
+  try { out = await reply(text, wasGuard, sendText); } finally { busy = false; }
   justNamed = "";
   if (wasGuard) {
-    var failed = /^(Abhi jawab nahi|Connection error|Jawab mein bahut|Server ne ajeeb|Khali jawab|Error:)/.test(out);
+    var failed = ERR_RE.test(out);
     if (flags.length && failed) out = "\u26A0\uFE0F Turant sanket:\n- " + flags.join("\n- ") + "\n\n" + out;
     applyGuard(false);
   }
   typing.remove();
+  var isErr = ERR_RE.test(out);
   var el = add(out, "bot");
-  if (!/^(Abhi jawab nahi|Connection error|Jawab mein bahut|Server ne ajeeb|Khali jawab|Error:)/.test(out)) attachFeedback(el, text, out);
+  if (!isErr) {
+    // Suraksha jaanch ka asli text feedback mein save nahi hota (privacy).
+    attachFeedback(el, wasGuard ? "[Suraksha jaanch: text save nahi kiya]" : text, wasGuard ? "[jawab save nahi kiya]" : out);
+  }
   scrollBot(el, "bot");
-  memory.history.push({role: "assistant", content: out});
+  if (!wasGuard) {
+    if (isErr) { memory.history.pop(); t.value = text; }          // fail hua: history saaf, text wapas box mein
+    else memory.history.push({role: "assistant", content: out});
+  }
   memory.history = memory.history.slice(-40);
   save();
 });
